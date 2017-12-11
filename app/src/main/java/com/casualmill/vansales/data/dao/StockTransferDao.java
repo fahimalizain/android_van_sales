@@ -5,9 +5,8 @@ import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
 
-import com.casualmill.vansales.models.Invoice;
-import com.casualmill.vansales.models.StockEntry;
-import com.casualmill.vansales.models.StockTransfer;
+import com.casualmill.vansales.data.models.Invoice;
+import com.casualmill.vansales.data.models.StockTransfer;
 
 import java.util.List;
 

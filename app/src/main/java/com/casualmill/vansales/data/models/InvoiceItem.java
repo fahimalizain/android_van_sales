@@ -1,8 +1,9 @@
-package com.casualmill.vansales.models;
+package com.casualmill.vansales.data.models;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
+import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 
 /**
@@ -10,6 +11,7 @@ import android.arch.persistence.room.PrimaryKey;
  */
 
 @Entity(tableName = "invoice_items",
+        indices = {@Index("invoice_no")},
         foreignKeys = @ForeignKey(entity = Invoice.class,
                 parentColumns = "invoice_no", childColumns = "invoice_no",
                 onDelete = ForeignKey.CASCADE, onUpdate = ForeignKey.CASCADE))

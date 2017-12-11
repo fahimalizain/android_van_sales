@@ -1,4 +1,4 @@
-package com.casualmill.vansales.models;
+package com.casualmill.vansales.data.models;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;

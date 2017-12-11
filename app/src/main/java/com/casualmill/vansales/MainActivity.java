@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.casualmill.vansales.fragments.InvoiceFragment;
 import com.casualmill.vansales.fragments.ItemFragment;
+import com.casualmill.vansales.fragments.TransferFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,10 +27,10 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.navigation_sales:
                     viewPager.setCurrentItem(0);
                     return true;
-                case R.id.navigation_items:
+                case R.id.navigation_transfer:
                     viewPager.setCurrentItem(1);
                     return true;
-                case R.id.navigation_settings:
+                case R.id.navigation_items:
                     viewPager.setCurrentItem(2);
                     return true;
             }
@@ -55,6 +56,8 @@ public class MainActivity extends AppCompatActivity {
                     case 0:
                         return new InvoiceFragment();
                     case 1:
+                        return new TransferFragment();
+                    case 2:
                         return new ItemFragment();
                     default:
                         return null;
@@ -63,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public int getCount() {
-                return 2;
+                return 3;
             }
         };
         viewPager.setAdapter(adapter);

@@ -15,10 +15,6 @@ buildscript {
     }
 }
 
-ext {
-    archRoomVersion = "1.0.0-alpha1"
-}
-
 allprojects {
     repositories {
         google()
