@@ -1,10 +1,11 @@
-package com.casualmill.vansales;
+package com.casualmill.vansales.activities;
 
 import android.content.Intent;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import com.casualmill.vansales.R;
 import com.casualmill.vansales.data.AppDatabase;
 
 public class SplashActivity extends AppCompatActivity {

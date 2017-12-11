@@ -4,9 +4,9 @@
     android:layout_height="match_parent"
     tools:context="com.casualmill.vansales.fragments.ItemFragment">
 
-    <TextView
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/item_recyclerView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="item fragment" />
+        android:layout_height="match_parent"/>
 
 </FrameLayout>

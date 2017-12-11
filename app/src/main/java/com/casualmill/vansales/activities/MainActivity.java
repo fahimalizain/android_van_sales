@@ -1,4 +1,4 @@
-package com.casualmill.vansales;
+package com.casualmill.vansales.activities;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -7,9 +7,11 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.casualmill.vansales.R;
 import com.casualmill.vansales.fragments.InvoiceFragment;
 import com.casualmill.vansales.fragments.ItemFragment;
 import com.casualmill.vansales.fragments.TransferFragment;
@@ -71,9 +73,34 @@ public class MainActivity extends AppCompatActivity {
         };
         viewPager.setAdapter(adapter);
 
+
         // Bottom Nav
-        BottomNavigationView navigation = findViewById(R.id.navigation);
+        final BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) { }
+            @Override
+            public void onPageSelected(int position) {
+                int id = -1;
+                switch (position) {
+                    case 0:
+                        id = R.id.navigation_sales;
+                        break;
+                    case 1:
+                        id = R.id.navigation_transfer;
+                        break;
+                    case 2:
+                        id = R.id.navigation_items;
+                }
+                navigation.setSelectedItemId(id);
+            }
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+
     }
 
 }

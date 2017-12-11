@@ -6,4 +6,9 @@
     <string name="title_transfers">Transfers</string>
     <string name="title_invoices">Invoices</string>
     <string name="string_plus">+</string>
+    <string name="string_item_name">Item Name</string>
+    <string name="string_item_code">Item Code</string>
+    <string name="string_barcode">Barcode</string>
+    <string name="string_price">Price</string>
+    <string name="string_qty">Qty</string>
 </resources>
