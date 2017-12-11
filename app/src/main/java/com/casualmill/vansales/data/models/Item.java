@@ -2,6 +2,7 @@ package com.casualmill.vansales.data.models;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
@@ -18,4 +19,10 @@ public class Item {
     public String itemName;
 
     public String barcode;
+
+    public float price;
+
+    @Ignore
+    @ColumnInfo(name = "stock_balance")
+    public float stock_balance;
 }

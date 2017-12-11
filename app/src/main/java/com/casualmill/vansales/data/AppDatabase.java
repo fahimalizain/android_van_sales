@@ -6,6 +6,12 @@ import android.arch.persistence.room.RoomDatabase;
 import android.arch.persistence.room.TypeConverters;
 import android.content.Context;
 
+import com.casualmill.vansales.data.dao.InvoiceDao;
+import com.casualmill.vansales.data.dao.InvoiceItemDao;
+import com.casualmill.vansales.data.dao.ItemDao;
+import com.casualmill.vansales.data.dao.StockEntryDao;
+import com.casualmill.vansales.data.dao.StockTransferDao;
+import com.casualmill.vansales.data.dao.StockTransferItemDao;
 import com.casualmill.vansales.data.models.Invoice;
 import com.casualmill.vansales.data.models.InvoiceItem;
 import com.casualmill.vansales.data.models.Item;
@@ -24,6 +30,13 @@ import com.casualmill.vansales.data.models.StockTransferItem;
 public abstract class AppDatabase extends RoomDatabase {
 
     public static AppDatabase Instance;
+
+    public abstract ItemDao itemDao();
+    public abstract InvoiceDao invoiceDao();
+    public abstract InvoiceItemDao invoiceItemDao();
+    public abstract StockEntryDao stockEntryDao();
+    public abstract StockTransferDao stockTransferDao();
+    public abstract StockTransferItemDao stockTransferItemDao();
 
     public static AppDatabase getAppDatabase(Context ctx) {
         if (Instance == null)

@@ -17,7 +17,7 @@ public interface StockTransferDao {
     List<StockTransfer> getAll();
 
     @Query("SELECT * FROM stock_transfers WHERE transfer_no = :transfer_no LIMIT 1")
-    Invoice get_stockTransfer(int transfer_no);
+    StockTransfer get_stockTransfer(int transfer_no);
 
     @Insert
     void Insert(StockTransfer st);

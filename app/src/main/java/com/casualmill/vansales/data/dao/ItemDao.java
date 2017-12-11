@@ -12,8 +12,11 @@ import java.util.List;
 @Dao
 public interface ItemDao {
 
-    @Query("SELECT * FROM items")
+    @Query("SELECT *, (SELECT SUM(qty) FROM stock_entries WHERE item_code = i.item_code) as stock_balance FROM items i")
     List<Item> getAll();
+
+    @Query("DELETE FROM items")
+    void DeleteAll();
 
     @Insert
     void Insert(Item item);

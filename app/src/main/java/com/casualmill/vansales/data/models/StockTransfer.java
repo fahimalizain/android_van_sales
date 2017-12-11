@@ -15,7 +15,7 @@ public class StockTransfer {
 
     @PrimaryKey
     @ColumnInfo(name = "transfer_no")
-    int transferNo;
+    public int transferNo;
 
-    Date date;
+    public Date date;
 }
