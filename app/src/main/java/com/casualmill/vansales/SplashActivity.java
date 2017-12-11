@@ -5,6 +5,8 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import com.casualmill.vansales.data.AppDatabase;
+
 public class SplashActivity extends AppCompatActivity {
 
     @Override
@@ -15,6 +17,7 @@ public class SplashActivity extends AppCompatActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
+                AppDatabase.getAppDatabase(getApplicationContext());
                 Intent activity_intent = new Intent(SplashActivity.this, MainActivity.class);
                 startActivity(activity_intent);
                 finish();
