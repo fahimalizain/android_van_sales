@@ -3,6 +3,7 @@ package com.casualmill.vansales.data.models;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.ForeignKey;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 
@@ -25,6 +26,11 @@ public class InvoiceItem {
 
     @ColumnInfo(name = "item_code")
     public String itemCode;
+
+    @Ignore
+    public String itemName;
+    @Ignore
+    public String barcode;
 
     public float qty;
 

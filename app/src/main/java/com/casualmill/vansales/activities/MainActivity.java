@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.casualmill.vansales.R;
+import com.casualmill.vansales.data.DummyData;
 import com.casualmill.vansales.fragments.InvoiceFragment;
 import com.casualmill.vansales.fragments.ItemFragment;
 import com.casualmill.vansales.fragments.TransferFragment;
@@ -49,6 +50,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void LoadUI() {
+        // Dummy Data
+        // DummyData.AddDummyItems();
+
         // Viewpager
         viewPager = findViewById(R.id.main_viewPager);
         FragmentPagerAdapter adapter = new FragmentPagerAdapter(getSupportFragmentManager()) {

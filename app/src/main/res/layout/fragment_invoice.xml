@@ -6,6 +6,7 @@
     tools:context="com.casualmill.vansales.fragments.InvoiceFragment">
 
     <android.support.design.widget.FloatingActionButton
+        android:id="@+id/invoice_fab"
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:layout_margin="16dp"

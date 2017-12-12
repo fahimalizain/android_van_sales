@@ -15,6 +15,9 @@ public interface ItemDao {
     @Query("SELECT *, (SELECT SUM(qty) FROM stock_entries WHERE item_code = i.item_code) as stock_balance FROM items i")
     List<Item> getAll();
 
+    @Query("SELECT * FROM items WHERE barcode = :barcode")
+    Item FindByBarcode(String barcode);
+
     @Query("DELETE FROM items")
     void DeleteAll();
 

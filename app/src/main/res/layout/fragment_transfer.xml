@@ -9,8 +9,6 @@
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:layout_margin="16dp"
-        android:background="@android:color/holo_red_light"
-        android:backgroundTint="@color/colorAccent"
         app:srcCompat="@drawable/ic_add"
         android:layout_gravity="bottom|end"
         app:layout_anchor="@id/transfer_recyclerView"
