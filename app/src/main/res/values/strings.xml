@@ -11,4 +11,5 @@
     <string name="string_barcode">Barcode</string>
     <string name="string_price">Price</string>
     <string name="string_qty">Qty</string>
+    <string name="string_sync">Sync</string>
 </resources>

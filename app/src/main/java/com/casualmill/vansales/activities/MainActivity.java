@@ -8,11 +8,16 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.casualmill.vansales.R;
+import com.casualmill.vansales.data.AppDatabase;
 import com.casualmill.vansales.data.DummyData;
+import com.casualmill.vansales.data.SyncData;
 import com.casualmill.vansales.fragments.InvoiceFragment;
 import com.casualmill.vansales.fragments.ItemFragment;
 import com.casualmill.vansales.fragments.TransferFragment;
@@ -20,6 +25,23 @@ import com.casualmill.vansales.fragments.TransferFragment;
 public class MainActivity extends AppCompatActivity {
 
     private ViewPager viewPager;
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inf = getMenuInflater();
+        inf.inflate(R.menu.main_options, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_sync :
+                   new SyncData(this).execute();
+            break;
+        };
+        return true;
+    }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -47,6 +69,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         LoadUI();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        AppDatabase.destroyAppDatabase();
     }
 
     protected void LoadUI() {

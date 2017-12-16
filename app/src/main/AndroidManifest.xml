@@ -3,17 +3,18 @@
     package="com.casualmill.vansales">
 
     <uses-feature android:name="android.hardware.camera" />
+
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
         android:hardwareAccelerated="true"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
@@ -39,7 +40,10 @@
             android:theme="@style/NoActionBar" />
         <activity
             android:name=".activities.ItemSearchActivity"
-            android:theme="@style/NoActionBar"/>
+            android:theme="@style/NoActionBar" />
+        <activity
+            android:name=".activities.LoadingActivity"
+            android:theme="@style/Theme.AppCompat.Translucent"/>
     </application>
 
 </manifest>
