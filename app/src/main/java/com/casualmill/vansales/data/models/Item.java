@@ -21,7 +21,7 @@ public class Item implements Serializable {
 
     public String barcode;
 
-    public float price;
+    public float default_uom;
 
     @ColumnInfo(name = "stock_balance")
     public float stock_balance;

@@ -13,3 +13,8 @@ An app that can sync and fetch item details from a specified network stream, do 
 ### Byte Stream Info
 The following is expected from the Server on connection: (Simple TCP Socket Connection)
 
+- Server Sends `6` (int)
+- App verifies and sends back `6`
+- Connection established
+
+Requests are made by the app, for each request:

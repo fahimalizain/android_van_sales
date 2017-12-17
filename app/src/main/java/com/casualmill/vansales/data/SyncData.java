@@ -3,6 +3,7 @@ package com.casualmill.vansales.data;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.util.Xml;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.widget.FrameLayout;
@@ -11,6 +12,15 @@ import com.casualmill.vansales.R;
 import com.casualmill.vansales.activities.LoadingActivity;
 import com.casualmill.vansales.activities.MainActivity;
 
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.Inet4Address;
 import java.net.Socket;
 
@@ -51,8 +61,19 @@ public class SyncData extends AsyncTask<Void, Void, Void> {
     protected Void doInBackground(Void... voids) {
         try {
             Socket socket = new Socket(Inet4Address.getByName("10.0.2.2"), 18565);
+            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+            DataInputStream in = new DataInputStream(socket.getInputStream());
 
 
+
+            JSONObject obj = new JSONObject();
+            obj.put("name", "Fahim Ali Zain");
+            byte[] data = obj.toString().getBytes("UTF-16BE");
+
+            out.writeInt(data.length);
+            out.flush();
+            out.write(data);
+            out.flush();
             socket.close();
         } catch (Exception e) {}
         return null;
