@@ -24,7 +24,6 @@ public class DummyData {
                     t.itemCode = "ITM00" + i;
                     t.itemName = "Item Name " + i;
                     t.barcode = String.valueOf(i * r.nextInt(1000) * 20);
-                    t.price = (200 - i) % (r.nextInt(10) + 5) + i * 50;
                     AppDatabase.Instance.itemDao().Insert(t);
                 }
             }

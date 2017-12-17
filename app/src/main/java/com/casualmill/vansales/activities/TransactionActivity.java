@@ -102,7 +102,7 @@ public class TransactionActivity extends AppCompatActivity {
                 item.itemCode = t.itemCode;
                 item.itemName = t.itemName;
                 item.qty = 1;
-                item.price = t.price;
+                // item.price = t.price;
 
                 itemsAdapter.items.add(item);
                 itemsAdapter.notifyItemInserted(itemsAdapter.items.size() - 1);

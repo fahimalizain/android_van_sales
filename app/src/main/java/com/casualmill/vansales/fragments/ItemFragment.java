@@ -79,7 +79,7 @@ public class ItemFragment extends Fragment {
             holder.itemName.setText(item.itemName);
             holder.itemCode.setText(item.itemCode);
             holder.barCode.setText(item.barcode);
-            holder.price.setText("$" + item.price);
+            // holder.price.setText("$" + item.price);
             holder.qty.setText(item.stock_balance + "");
         }
 
