@@ -7,6 +7,8 @@ import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
 
+import java.util.List;
+
 /**
  * Created by faztp on 11-Dec-17.
  */
@@ -26,6 +28,9 @@ public class InvoiceItem {
 
     @ColumnInfo(name = "item_code")
     public String itemCode;
+
+    @Ignore
+    public List<UOM> UnitDetails;
 
     @Ignore
     public String itemName;

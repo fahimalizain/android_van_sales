@@ -14,7 +14,7 @@ public interface UOMDao {
     @Query("SELECT * FROM uom")
     List<UOM> getAll();
 
-    @Query("SELECT * FROM UOM WHERE item_code = :item_code")
+    @Query("SELECT * FROM uom WHERE item_code = :item_code")
     List<UOM> get_item_units(String item_code);
 
     @Insert

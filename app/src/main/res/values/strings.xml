@@ -12,4 +12,5 @@
     <string name="string_price">Price</string>
     <string name="string_qty">Qty</string>
     <string name="string_sync">Sync</string>
+    <string name="title_activity_settings">Settings</string>
 </resources>

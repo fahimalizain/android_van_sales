@@ -16,7 +16,7 @@ namespace test_server
             CancellationTokenSource _cancel = new CancellationTokenSource();
             Thread t = new Thread(() =>
             {
-                TcpListener listener = new TcpListener(new IPEndPoint(IPAddress.Loopback, 18565));
+                TcpListener listener = new TcpListener(new IPEndPoint(IPAddress.Any, 8000));                
                 listener.Start();
                 Console.WriteLine("Started Listening..");
                 while (true)
@@ -81,7 +81,7 @@ namespace test_server
             // Big Endian
             string data = getString(response);
 
-            Console.WriteLine("JSON Read :\n" + data);
+            Console.WriteLine(data);
             return JObject.Parse(data);           
         }
 
@@ -142,6 +142,7 @@ namespace test_server
                 item_obj["item_code"] = item_code;
                 item_obj["item_name"] = "Item 1" + i.ToString().PadLeft(4, '0');
                 item_obj["barcode"] = r.Next(100000, 1000000);
+                item_obj["default_uom"] = r.Next(0, 2) == 0 ? "pcs" : "box";
                 items.Add(item_obj);
                 
                 stock_details[item_code] = r.Next(30, 300);

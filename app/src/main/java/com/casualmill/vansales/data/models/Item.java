@@ -2,10 +2,12 @@ package com.casualmill.vansales.data.models;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
 import java.io.Serializable;
+import java.util.List;
 
 
 @Entity(tableName = "items")
@@ -21,7 +23,10 @@ public class Item implements Serializable {
 
     public String barcode;
 
-    public float default_uom;
+    public String default_uom;
+
+    @Ignore
+    public List<UOM> UnitDetails;
 
     @ColumnInfo(name = "stock_balance")
     public float stock_balance;
