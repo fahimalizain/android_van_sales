@@ -43,7 +43,8 @@
             android:theme="@style/NoActionBar" />
         <activity
             android:name=".activities.LoadingActivity"
-            android:theme="@style/Theme.AppCompat.Translucent"/>
+            android:theme="@style/Theme.AppCompat.Translucent" />
+        <activity android:name=".activities.SettingsActivity"/>
     </application>
 
 </manifest>

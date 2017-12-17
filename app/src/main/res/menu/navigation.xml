@@ -7,11 +7,6 @@
         android:title="@string/title_invoices" />
 
     <item
-        android:id="@+id/navigation_transfer"
-        android:icon="@drawable/ic_compare_arrows_black_24dp"
-        android:title="@string/title_transfers" />
-
-    <item
         android:id="@+id/navigation_items"
         android:icon="@drawable/ic_dns_black_24dp"
         android:title="@string/title_items" />

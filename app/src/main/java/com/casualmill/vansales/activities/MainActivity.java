@@ -1,26 +1,24 @@
 package com.casualmill.vansales.activities;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import com.casualmill.vansales.R;
 import com.casualmill.vansales.data.AppDatabase;
-import com.casualmill.vansales.data.DummyData;
 import com.casualmill.vansales.data.SyncData;
 import com.casualmill.vansales.fragments.InvoiceFragment;
 import com.casualmill.vansales.fragments.ItemFragment;
-import com.casualmill.vansales.fragments.TransferFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,9 +35,14 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_sync :
-                   new SyncData(this).execute();
-            break;
-        };
+                SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+                new SyncData(this).execute(sp.getString("server_address", "10.0.2.2:18565"), sp.getString("vehicle_id", "VAN12345"));
+                break;
+            case R.id.menu_settings :
+                Intent in = new Intent(this, SettingsActivity.class);
+                startActivity(in);
+                break;
+        }
         return true;
     }
 
@@ -52,11 +55,8 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.navigation_sales:
                     viewPager.setCurrentItem(0);
                     return true;
-                case R.id.navigation_transfer:
-                    viewPager.setCurrentItem(1);
-                    return true;
                 case R.id.navigation_items:
-                    viewPager.setCurrentItem(2);
+                    viewPager.setCurrentItem(1);
                     return true;
             }
             return false;
@@ -90,8 +90,6 @@ public class MainActivity extends AppCompatActivity {
                     case 0:
                         return new InvoiceFragment();
                     case 1:
-                        return new TransferFragment();
-                    case 2:
                         return new ItemFragment();
                     default:
                         return null;
@@ -100,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public int getCount() {
-                return 3;
+                return 2;
             }
         };
         viewPager.setAdapter(adapter);
@@ -120,9 +118,6 @@ public class MainActivity extends AppCompatActivity {
                         id = R.id.navigation_sales;
                         break;
                     case 1:
-                        id = R.id.navigation_transfer;
-                        break;
-                    case 2:
                         id = R.id.navigation_items;
                 }
                 navigation.setSelectedItemId(id);

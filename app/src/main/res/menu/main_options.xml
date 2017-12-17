@@ -3,4 +3,7 @@
     <item
         android:id="@+id/menu_sync"
         android:title="@string/string_sync"/>
+    <item
+        android:id="@+id/menu_settings"
+        android:title="@string/title_activity_settings"/>
 </menu>

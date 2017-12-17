@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/title_activity_settings">
+    <EditTextPreference
+        android:title="Server Address"
+        android:key="server_address"
+        android:summary="Provide server address in the format IPADDR:PORT"/>
+
+    <EditTextPreference
+        android:title="Vehicle ID"
+        android:key="vehicle_id"
+        android:summary="ID of the vehicle to be passed to the server on Sync"/>
+</PreferenceScreen>
