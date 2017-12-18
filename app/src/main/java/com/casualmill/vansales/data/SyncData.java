@@ -28,29 +28,22 @@ import java.net.Socket;
 public class SyncData extends AsyncTask<String, Void, Boolean> {
 
     private WeakReference<Context> ctx;
-    private Intent loadingIntent;
 
     public SyncData(Context ctx) {
         this.ctx = new WeakReference<>(ctx);
-        loadingIntent = new Intent(ctx, LoadingActivity.class);
-        loadingIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        loadingIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
 
-        loadingIntent.putExtra("keep", true);
-        ctx.get().startActivity(loadingIntent);
+        LoadingActivity.Start(ctx.get());
     }
 
     @Override
     protected void onPostExecute(Boolean aBool) {
         super.onPostExecute(aBool);
-
-        loadingIntent.putExtra("keep", false);
-        ctx.get().startActivity(loadingIntent);
+        LoadingActivity.Stop(ctx.get());
 
         Toast.makeText(ctx.get(), aBool ? "Sync Successful" : "Sync Failed. Please try again.", Toast.LENGTH_SHORT).show();
         ctx = null;

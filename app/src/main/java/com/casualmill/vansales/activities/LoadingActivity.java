@@ -1,5 +1,6 @@
 package com.casualmill.vansales.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,7 +19,7 @@ public class LoadingActivity extends AppCompatActivity {
     protected void onNewIntent(Intent intent)
     {
         super.onNewIntent(intent);
-        boolean keep = intent.getExtras().getBoolean("keep");
+        boolean keep = intent.getExtras().getBoolean("keep", true);
         if(!keep)
         {
             this.finish();
@@ -28,5 +29,20 @@ public class LoadingActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
 
+    }
+
+    public static Intent getIntent(Context ctx) {
+        Intent intent = new Intent(ctx, LoadingActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        return intent;
+    }
+
+    public static void Start(Context ctx) {
+        ctx.startActivity(getIntent(ctx));
+    }
+
+    public static void Stop(Context ctx) {
+        ctx.startActivity(getIntent(ctx).putExtra("keep", false));
     }
 }
