@@ -3,12 +3,13 @@ package com.casualmill.vansales.activities;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -17,12 +18,15 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.casualmill.vansales.R;
+import com.casualmill.vansales.animation.ResizeAnimation;
 import com.casualmill.vansales.data.models.InvoiceItem;
 import com.casualmill.vansales.data.models.Item;
-import com.casualmill.vansales.fragments.ItemFragment;
+import com.casualmill.vansales.data.models.UOM;
 import com.google.android.gms.common.api.CommonStatusCodes;
 
 import java.util.ArrayList;
@@ -33,6 +37,7 @@ public class TransactionActivity extends AppCompatActivity {
 
     public static int ITEM_ADD_ACTIVITY_REQUEST_CODE = 59;
     private ItemsAdapter itemsAdapter;
+    private ItemsAdapter.Holder expandedHolder = null;
     private EditText discountEditText;
     private TextView totalTextView, grandTotalTextView;
 
@@ -92,6 +97,19 @@ public class TransactionActivity extends AppCompatActivity {
         RecyclerView r = findViewById(R.id.invoice_itemrecyclerView);
         r.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         r.setAdapter(itemsAdapter);
+
+        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                return false;
+            }
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                itemsAdapter.items.remove(viewHolder.getAdapterPosition());
+                itemsAdapter.notifyItemRemoved(viewHolder.getAdapterPosition());
+            }
+        };
+        new ItemTouchHelper(simpleCallback).attachToRecyclerView(r);
     }
 
     @Override
@@ -118,6 +136,7 @@ public class TransactionActivity extends AppCompatActivity {
                 item.itemCode = t.itemCode;
                 item.itemName = t.itemName;
                 item.qty = 1;
+                item.UnitDetails = t.UnitDetails;
                 // item.price = t.price;
 
                 itemsAdapter.items.add(item);
@@ -177,6 +196,12 @@ public class TransactionActivity extends AppCompatActivity {
             holder.barCode.setText(item.barcode);
             holder.price.setText(String.format(Locale.ENGLISH ,"$%.2f", item.price));
             holder.qty.setText(String.valueOf(item.qty));
+
+            // unit init
+            ArrayAdapter spinnerAdapter = new ArrayAdapter<>(getBaseContext(), android.R.layout.simple_spinner_item, item.UnitDetails.toArray());
+            spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            holder.unitSpinner.setAdapter(spinnerAdapter);
+            holder.unitSpinner.setSelection(0);
         }
 
         @Override
@@ -187,7 +212,10 @@ public class TransactionActivity extends AppCompatActivity {
         public class Holder extends RecyclerView.ViewHolder {
 
             public TextView itemName, itemCode, barCode, qty, price;
+            public Spinner unitSpinner;
+            public View currentView;
             public InvoiceItem item;
+            private Boolean expanded = false;
 
             public Holder(View itemView) {
                 super(itemView);
@@ -196,6 +224,15 @@ public class TransactionActivity extends AppCompatActivity {
                 this.barCode = itemView.findViewById(R.id.invoiceitem_item_barCode);
                 this.price = itemView.findViewById(R.id.invoiceitem_item_price);
                 this.qty = itemView.findViewById(R.id.invoiceitem_item_qty);
+                this.unitSpinner = itemView.findViewById(R.id.invoiceitem_unit_spinner);
+
+                currentView = itemView;
+                currentView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        // ToggleExpand();
+                    }
+                });
 
                 qty.addTextChangedListener(new TextWatcher() {
 
@@ -216,21 +253,54 @@ public class TransactionActivity extends AppCompatActivity {
                     }
                 });
 
+                unitSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                        item.price = ((UOM) unitSpinner.getSelectedItem()).price;
+                        price.setText(String.format(Locale.ENGLISH, "$%.2f", item.price));
+                        CalculateTotal();
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> adapterView) {
+                        item.price = 0;
+                        price.setText("$0.00");
+                        CalculateTotal();
+                    }
+                });
+
                 View.OnClickListener qty_button_listener = new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         if (view.getId() == R.id.invoiceitem_add_qty)
                             item.qty++;
-                        else
+                        else {
                             item.qty--;
-
+                            item.qty = Math.max(0, item.qty);
+                        }
                         qty.setText(String.valueOf(item.qty));
+                        CalculateTotal();
                     }
                 };
                 itemView.findViewById(R.id.invoiceitem_add_qty).setOnClickListener(qty_button_listener);
                 itemView.findViewById(R.id.invoiceitem_sub_qty).setOnClickListener(qty_button_listener);
 
             }
+
+            void ToggleExpand() {
+                ResizeAnimation anim = new ResizeAnimation(currentView, ((int) (getResources().getDimensionPixelSize(R.dimen.itemlist_height) * (expanded ? 1 : 2f))), true);
+                anim.setDuration(500);
+                currentView.startAnimation(anim);
+                expanded = !expanded;
+
+                if (expanded) {
+                    if (expandedHolder != null)
+                        expandedHolder.ToggleExpand();
+                    expandedHolder = this;
+                } else if (expandedHolder == this) // retracted by clicking self
+                    expandedHolder = null;
+            }
         }
     }
 }
+

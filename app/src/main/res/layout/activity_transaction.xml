@@ -61,10 +61,13 @@
             android:layout_width="165dp"
             android:layout_height="52dp"
             android:layout_marginEnd="8dp"
-            android:layout_marginTop="0dp"
-            android:drawableStart="@drawable/ic_add"
+            android:layout_marginStart="8dp"
+            android:background="?attr/selectableItemBackground"
+            android:drawableStart="@drawable/ic_add_black"
+            android:padding="10dp"
             android:text="Add Item"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/transaction_textInputLayout2" />
 
         <LinearLayout
@@ -78,14 +81,14 @@
             android:layout_marginTop="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            android:animateLayoutChanges="true"
             app:layout_constraintTop_toBottomOf="@+id/textView7">
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/invoice_itemrecyclerView"
                 android:layout_width="match_parent"
-                android:background="@android:color/white"
                 android:layout_height="wrap_content"
-                 />
+                android:background="@android:color/white" />
         </LinearLayout>
 
         <TextView
@@ -150,13 +153,17 @@
 
         <Button
             android:id="@+id/button"
-            android:layout_width="200dp"
+            android:layout_width="150dp"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
+            android:background="?attr/selectableItemBackground"
             android:drawableStart="@drawable/ic_save_black_24dp"
+            android:padding="10dp"
             android:text="Save"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/invoice_labelgtotal" />
@@ -175,17 +182,27 @@
             android:id="@+id/textView8"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="130dp"
             android:layout_marginTop="8dp"
             android:text="Price"
             app:layout_constraintEnd_toEndOf="@+id/transaction_rv_container"
-            app:layout_constraintStart_toStartOf="@+id/transaction_rv_container"
+            app:layout_constraintTop_toBottomOf="@+id/invoice_add_item" />
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="210dp"
+            android:layout_marginTop="8dp"
+            android:text="Unit"
+            app:layout_constraintEnd_toEndOf="@+id/transaction_rv_container"
             app:layout_constraintTop_toBottomOf="@+id/invoice_add_item" />
 
         <TextView
             android:id="@+id/textView9"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="30dp"
             android:layout_marginTop="8dp"
             android:text="Qty"
             app:layout_constraintEnd_toEndOf="@+id/transaction_rv_container"
