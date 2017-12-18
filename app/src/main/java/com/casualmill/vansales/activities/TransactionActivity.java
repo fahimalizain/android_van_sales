@@ -3,9 +3,9 @@ package com.casualmill.vansales.activities;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -14,9 +14,10 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.casualmill.vansales.R;
 import com.casualmill.vansales.data.models.InvoiceItem;
@@ -32,6 +33,8 @@ public class TransactionActivity extends AppCompatActivity {
 
     public static int ITEM_ADD_ACTIVITY_REQUEST_CODE = 59;
     private ItemsAdapter itemsAdapter;
+    private EditText discountEditText;
+    private TextView totalTextView, grandTotalTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +56,19 @@ public class TransactionActivity extends AppCompatActivity {
         // 1 - Transfer
         Toolbar b = findViewById(R.id.transaction_toolbar);
         setSupportActionBar(b);
+
+        discountEditText = findViewById(R.id.invoice_discount);
+        totalTextView = findViewById(R.id.invoice_total);
+        grandTotalTextView  = findViewById(R.id.invoice_gtotal);
+
+        discountEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                CalculateTotal();
+            }
+            @Override public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
+            @Override public void afterTextChanged(Editable editable) { }
+        });
 
         final Drawable upArrow = getResources().getDrawable(R.drawable.ic_arrow_back_black_24dp);
         upArrow.setColorFilter(getResources().getColor(R.color.colorPrimaryBGText), PorterDuff.Mode.SRC_ATOP);
@@ -109,8 +125,32 @@ public class TransactionActivity extends AppCompatActivity {
             } else {
                 itemsAdapter.notifyItemChanged(itemsAdapter.items.indexOf(item));
             }
+            CalculateTotal();
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private synchronized void CalculateTotal() {
+        final float discount = Math.round(Float.valueOf(discountEditText.getText().toString().isEmpty() ? "0" : discountEditText.getText().toString()) * 100) / 100;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                float tot = 0;
+                for (InvoiceItem i :itemsAdapter.items) {
+                    tot += Math.round(i.qty * i.price * 100) / 100;
+                }
+                final float total = tot;
+                final float grandTotal = total - discount;
+                new Handler(getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        discountEditText.setText(String.format(Locale.ENGLISH, "%.2f", discount));
+                        totalTextView.setText(String.format(Locale.ENGLISH, "%.2f", total));
+                        grandTotalTextView.setText(String.format(Locale.ENGLISH, "%.2f", grandTotal));
+                    }
+                });
+            }
+        }).start();
     }
 
     public class ItemsAdapter extends RecyclerView.Adapter<TransactionActivity.ItemsAdapter.Holder> {
@@ -135,7 +175,7 @@ public class TransactionActivity extends AppCompatActivity {
             holder.itemName.setText(item.itemName);
             holder.itemCode.setText(item.itemCode);
             holder.barCode.setText(item.barcode);
-            holder.price.setText(String.format(Locale.ENGLISH ,"$%f", item.price));
+            holder.price.setText(String.format(Locale.ENGLISH ,"$%.2f", item.price));
             holder.qty.setText(String.valueOf(item.qty));
         }
 
@@ -167,6 +207,7 @@ public class TransactionActivity extends AppCompatActivity {
                     @Override
                     public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                         item.qty = Float.parseFloat(charSequence.toString());
+                        CalculateTotal();
                     }
 
                     @Override
