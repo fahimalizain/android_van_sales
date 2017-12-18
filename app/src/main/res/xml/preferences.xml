@@ -11,4 +11,15 @@
         android:title="Vehicle ID"
         android:key="vehicle_id"
         android:summary="ID of the vehicle to be passed to the server on Sync"/>
+
+
+    <EditTextPreference
+        android:title="Invoice No Template"
+        android:key="invoice_no_template"
+        android:summary="Specify the numbering template in for String Format. eg: SINV-VAN-A-%1"/>
+
+    <com.casualmill.vansales.support.IntegerEditTextPreference
+        android:title="Last Invoice No"
+        android:key="last_invoice_no"
+        android:summary="Used to determine the next invoice no."/>
 </PreferenceScreen>

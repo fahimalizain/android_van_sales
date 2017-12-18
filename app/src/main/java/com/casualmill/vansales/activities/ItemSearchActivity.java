@@ -15,48 +15,19 @@
  */
 package com.casualmill.vansales.activities;
 
-import android.Manifest;
-import android.annotation.SuppressLint;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.casualmill.vansales.R;
-import com.casualmill.vansales.camera.BarcodeTracker;
-import com.casualmill.vansales.camera.BarcodeTrackerFactory;
-import com.casualmill.vansales.camera.CameraSourcePreview;
-import com.casualmill.vansales.data.AppDatabase;
-import com.casualmill.vansales.data.DataHelper;
-import com.casualmill.vansales.data.dao.ItemDao;
-import com.casualmill.vansales.data.models.Item;
 import com.casualmill.vansales.fragments.BarcodeScanner;
 import com.casualmill.vansales.fragments.ItemSearchFragment;
-import com.casualmill.vansales.fragments.support.FragmentLifecycle;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.api.CommonStatusCodes;
-import com.google.android.gms.vision.CameraSource;
-import com.google.android.gms.vision.MultiProcessor;
-import com.google.android.gms.vision.barcode.Barcode;
-import com.google.android.gms.vision.barcode.BarcodeDetector;
-
-import java.io.IOException;
+import com.casualmill.vansales.support.FragmentLifecycle;
 
 /**
  * Activity for the multi-tracker app.  This app detects barcodes and displays the value with the

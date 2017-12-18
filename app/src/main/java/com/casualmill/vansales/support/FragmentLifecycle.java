@@ -1,6 +1,4 @@
-package com.casualmill.vansales.fragments.support;
-
-import android.support.v4.view.ViewPager;
+package com.casualmill.vansales.support;
 
 /**
  * Created by faztp on 18-Dec-17.

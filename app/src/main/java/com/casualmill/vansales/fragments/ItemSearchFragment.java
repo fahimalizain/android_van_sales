@@ -20,7 +20,7 @@ import com.casualmill.vansales.R;
 import com.casualmill.vansales.data.AppDatabase;
 import com.casualmill.vansales.data.DataHelper;
 import com.casualmill.vansales.data.models.Item;
-import com.casualmill.vansales.fragments.support.FragmentLifecycle;
+import com.casualmill.vansales.support.FragmentLifecycle;
 import com.google.android.gms.common.api.CommonStatusCodes;
 
 import java.util.ArrayList;
