@@ -26,7 +26,13 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
@@ -36,8 +42,12 @@ import com.casualmill.vansales.camera.BarcodeTracker;
 import com.casualmill.vansales.camera.BarcodeTrackerFactory;
 import com.casualmill.vansales.camera.CameraSourcePreview;
 import com.casualmill.vansales.data.AppDatabase;
+import com.casualmill.vansales.data.DataHelper;
 import com.casualmill.vansales.data.dao.ItemDao;
 import com.casualmill.vansales.data.models.Item;
+import com.casualmill.vansales.fragments.BarcodeScanner;
+import com.casualmill.vansales.fragments.ItemSearchFragment;
+import com.casualmill.vansales.fragments.support.FragmentLifecycle;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.CommonStatusCodes;
@@ -53,244 +63,68 @@ import java.io.IOException;
  * rear facing camera. During detection overlay graphics are drawn to indicate the position,
  * size, and ID of each barcode.
  */
-public final class ItemSearchActivity extends AppCompatActivity implements BarcodeTracker.BarcodeUpdateListener {
-    private static final String TAG = "Barcode-reader";
+public final class ItemSearchActivity extends AppCompatActivity {
 
-    // intent request code to handle updating play services if needed.
-    private static final int RC_HANDLE_GMS = 9001;
-
-    // permission request codes need to be < 256
-    private static final int RC_HANDLE_CAMERA_PERM = 2;
-
-    // constants used to pass extra data in the intent
-    public static final String AutoFocus = "AutoFocus";
-    public static final String UseFlash = "UseFlash";
-    public static final String BarcodeObject = "Barcode";
-
-    private CameraSource mCameraSource;
-    private CameraSourcePreview mPreview;
-
-    /**
-     * Initializes the UI and creates the detector pipeline.
-     */
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setContentView(R.layout.activity_item_search);
 
-        mPreview = findViewById(R.id.itemSearch_cameraPreview);
+        ViewPager pg = findViewById(R.id.itemsearch_rootViewPager);
+        TabLayout tl = findViewById(R.id.itemsearch_tabLayout);
+        tl.setupWithViewPager(pg);
+        final PagerAdapter pAdapter = new PagerAdapter(getSupportFragmentManager());
+        pg.setAdapter(pAdapter);
 
-        // read parameters from the intent used to launch the activity.
-        boolean autoFocus = getIntent().getBooleanExtra(AutoFocus, false);
-        boolean useFlash = getIntent().getBooleanExtra(UseFlash, false);
+        pg.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
 
-        // Check for the camera permission before accessing the camera.  If the
-        // permission is not granted yet, request permission.
-        int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
-        if (rc == PackageManager.PERMISSION_GRANTED) {
-            createCameraSource(autoFocus, useFlash);
-        } else {
-            requestCameraPermission();
-        }
-    }
+            int currentPosition = 0;
 
-    /**
-     * Handles the requesting of the camera permission.  This includes
-     * showing a "Snackbar" message of why the permission is needed then
-     * sending the request.
-     */
-    private void requestCameraPermission() {
-        Log.w(TAG, "Camera permission is not granted. Requesting permission");
+            @Override
+            public void onPageSelected(int newPosition) {
+                FragmentLifecycle fragmentToShow = (FragmentLifecycle)pAdapter.getItem(newPosition);
+                fragmentToShow.onResumeFragment();
 
-        final String[] permissions = new String[]{Manifest.permission.CAMERA};
+                FragmentLifecycle fragmentToHide = (FragmentLifecycle)pAdapter.getItem(currentPosition);
+                fragmentToHide.onPauseFragment();
 
-        ActivityCompat.requestPermissions(this, permissions, RC_HANDLE_CAMERA_PERM);
-    }
-
-    /**
-     * Creates and starts the camera.  Note that this uses a higher resolution in comparison
-     * to other detection examples to enable the barcode detector to detect small barcodes
-     * at long distances.
-     *
-     * Suppressing InlinedApi since there is a check that the minimum version is met before using
-     * the constant.
-     */
-    @SuppressLint("InlinedApi")
-    private void createCameraSource(boolean autoFocus, boolean useFlash) {
-        Context context = getApplicationContext();
-        Log.v(TAG, "Creating Camera Source");
-        Toast.makeText(getApplicationContext(), "Creating Camera Source", Toast.LENGTH_LONG);
-        // A barcode detector is created to track barcodes.  An associated multi-processor instance
-        // is set to receive the barcode detection results, track the barcodes, and maintain
-        // graphics for each barcode on screen.  The factory is used by the multi-processor to
-        // create a separate tracker instance for each barcode.
-        BarcodeDetector barcodeDetector = new BarcodeDetector.Builder(context).build();
-        BarcodeTrackerFactory barcodeFactory = new BarcodeTrackerFactory(this);
-        barcodeDetector.setProcessor(new MultiProcessor.Builder<>(barcodeFactory).build());
-
-        if (!barcodeDetector.isOperational()) {
-            // Note: The first time that an app using the barcode or face API is installed on a
-            // device, GMS will download a native libraries to the device in order to do detection.
-            // Usually this completes before the app is run for the first time.  But if that
-            // download has not yet completed, then the above call will not detect any barcodes
-            // and/or faces.
-            //
-            // isOperational() can be used to check if the required native libraries are currently
-            // available.  The detectors will automatically become operational once the library
-            // downloads complete on device.
-            Log.w(TAG, "Detector dependencies are not yet available.");
-
-            // Check for low storage.  If there is low storage, the native library will not be
-            // downloaded, so detection will not become operational.
-            IntentFilter lowstorageFilter = new IntentFilter(Intent.ACTION_DEVICE_STORAGE_LOW);
-            boolean hasLowStorage = registerReceiver(null, lowstorageFilter) != null;
-
-            if (hasLowStorage) {
-                Toast.makeText(this, "Low Storage, GMS cant proceed", Toast.LENGTH_LONG).show();
-                Log.w(TAG, "Low Storage, GMS cant proceed");
+                currentPosition = newPosition;
             }
-        } else {
-            Log.v(TAG, "Detector is Operational");
+
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) { }
+            @Override
+            public void onPageScrollStateChanged(int state) { }
+        });
+    }
+
+    public class PagerAdapter extends FragmentPagerAdapter {
+
+        public PagerAdapter(FragmentManager fm) {
+            super(fm);
         }
 
-        // Creates and starts the camera.  Note that this uses a higher resolution in comparison
-        // to other detection examples to enable the barcode detector to detect small barcodes
-        // at long distances.
-        CameraSource.Builder builder = new CameraSource.Builder(getApplicationContext(), barcodeDetector)
-                .setFacing(CameraSource.CAMERA_FACING_BACK)
-                .setRequestedPreviewSize(1600, 1024)
-                .setRequestedFps(15.0f);
+        @Override
+        public Fragment getItem(int position) {
+            if (position == 0)
+                return new BarcodeScanner();
+            else
+                return new ItemSearchFragment();
+        }
 
-        // make sure that auto focus is an available option
-        builder.setAutoFocusEnabled(true);
+        @Nullable
+        @Override
+        public CharSequence getPageTitle(int position) {
+            if (position == 0)
+                return "Barcode";
+            else
+                return "Search";
+        }
 
-        mCameraSource = builder
-                .build();
-
-        Toast.makeText(this, "CameraSource Built", Toast.LENGTH_SHORT).show();
-    }
-
-    /**
-     * Restarts the camera.
-     */
-    @Override
-    protected void onResume() {
-        super.onResume();
-        startCameraSource();
-    }
-
-    /**
-     * Stops the camera.
-     */
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (mPreview != null) {
-            mPreview.stop();
+        @Override
+        public int getCount() {
+            return 2;
         }
     }
 
-    /**
-     * Releases the resources associated with the camera source, the associated detectors, and the
-     * rest of the processing pipeline.
-     */
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (mPreview != null) {
-            mPreview.release();
-        }
-    }
-
-    /**
-     * Callback for the result from requesting permissions. This method
-     * is invoked for every call on {@link #requestPermissions(String[], int)}.
-     * <p>
-     * <strong>Note:</strong> It is possible that the permissions request interaction
-     * with the user is interrupted. In this case you will receive empty permissions
-     * and results arrays which should be treated as a cancellation.
-     * </p>
-     *
-     * @param requestCode  The request code passed in {@link #requestPermissions(String[], int)}.
-     * @param permissions  The requested permissions. Never null.
-     * @param grantResults The grant results for the corresponding permissions
-     *                     which is either {@link PackageManager#PERMISSION_GRANTED}
-     *                     or {@link PackageManager#PERMISSION_DENIED}. Never null.
-     * @see #requestPermissions(String[], int)
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        if (requestCode != RC_HANDLE_CAMERA_PERM) {
-            Log.d(TAG, "Got unexpected permission result: " + requestCode);
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-            return;
-        }
-
-        if (grantResults.length != 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "Camera permission granted - initialize the camera source");
-            // we have permission, so create the camerasource
-            boolean autoFocus = getIntent().getBooleanExtra(AutoFocus,false);
-            boolean useFlash = getIntent().getBooleanExtra(UseFlash, false);
-            createCameraSource(autoFocus, useFlash);
-            return;
-        }
-
-        Log.e(TAG, "Permission not granted: results len = " + grantResults.length +
-                " Result code = " + (grantResults.length > 0 ? grantResults[0] : "(empty)"));
-
-        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                finish();
-            }
-        };
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Van Sales")
-                .setMessage("No Camera Permission")
-                .setPositiveButton("OK", listener)
-                .show();
-    }
-
-    /**
-     * Starts or restarts the camera source, if it exists.  If the camera source doesn't exist yet
-     * (e.g., because onResume was called before the camera source was created), this will be called
-     * again when the camera source is created.
-     */
-    private void startCameraSource() throws SecurityException {
-        // check that the device has play services available.
-        int code = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(
-                getApplicationContext());
-        if (code != ConnectionResult.SUCCESS) {
-            Dialog dlg =
-                    GoogleApiAvailability.getInstance().getErrorDialog(this, code, RC_HANDLE_GMS);
-            //dlg.show();
-        }
-
-        if (mCameraSource != null) {
-            try {
-                mPreview.start(mCameraSource);
-                Log.e(TAG, "Camera Source Started");
-            } catch (IOException e) {
-                Log.e(TAG, "Unable to start camera source.", e);
-                mCameraSource.release();
-                mCameraSource = null;
-            }
-        }
-    }
-
-
-    @Override
-    public void onBarcodeDetected(Barcode barcode) {
-        Log.e(TAG, "DETECTED : " + barcode.rawValue);
-        Item t = AppDatabase.Instance.itemDao().FindByBarcode(barcode.rawValue);
-        if (t == null)
-            return;
-
-        Intent data = new Intent();
-        data.putExtra("Item", t);
-        setResult(CommonStatusCodes.SUCCESS, data);
-        finish(); 
-    }
 }

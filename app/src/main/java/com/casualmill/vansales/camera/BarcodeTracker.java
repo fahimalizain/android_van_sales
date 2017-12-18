@@ -25,12 +25,8 @@ public class BarcodeTracker extends Tracker<Barcode> {
         void onBarcodeDetected(Barcode barcode);
     }
 
-    public BarcodeTracker(Context context) {
-        if (context instanceof BarcodeUpdateListener) {
-            this.mBarcodeUpdateListener = (BarcodeUpdateListener) context;
-        } else {
-            throw new RuntimeException("Hosting activity must implement BarcodeUpdateListener");
-        }
+    public BarcodeTracker(BarcodeUpdateListener context) {
+        this.mBarcodeUpdateListener = context;
     }
 
     /**

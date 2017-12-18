@@ -12,13 +12,13 @@ import com.google.android.gms.vision.barcode.Barcode;
 
 public class BarcodeTrackerFactory implements MultiProcessor.Factory<Barcode> {
 
-    private Context mContext;
-    public BarcodeTrackerFactory(Context mContext) {
-        this.mContext = mContext;
+    private BarcodeTracker.BarcodeUpdateListener parent;
+    public BarcodeTrackerFactory(BarcodeTracker.BarcodeUpdateListener mContext) {
+        this.parent = mContext;
     }
 
     @Override
     public Tracker<Barcode> create(Barcode barcode) {
-        return new BarcodeTracker(mContext);
+        return new BarcodeTracker(parent);
     }
 }
