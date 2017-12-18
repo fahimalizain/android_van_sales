@@ -18,6 +18,9 @@ public interface ItemDao {
     @Query("SELECT * FROM items WHERE item_code = :item_code")
     Item getItem(String item_code);
 
+    @Query("SELECT * FROM items WHERE item_code LIKE '%' || :key || '%' OR item_name LIKE '%' || :key || '%'")
+    List<Item> searchItem(String key);
+
     @Query("SELECT * FROM items WHERE barcode = :barcode")
     Item FindByBarcode(String barcode);
 
