@@ -1,10 +1,16 @@
 package com.casualmill.vansales.activities;
 
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,24 +18,33 @@ import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.casualmill.vansales.R;
 import com.casualmill.vansales.animation.ResizeAnimation;
+import com.casualmill.vansales.data.AppDatabase;
+import com.casualmill.vansales.data.Converters;
+import com.casualmill.vansales.data.models.Invoice;
 import com.casualmill.vansales.data.models.InvoiceItem;
 import com.casualmill.vansales.data.models.Item;
 import com.casualmill.vansales.data.models.UOM;
 import com.google.android.gms.common.api.CommonStatusCodes;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -40,6 +55,7 @@ public class TransactionActivity extends AppCompatActivity {
     private ItemsAdapter.Holder expandedHolder = null;
     private EditText discountEditText;
     private TextView totalTextView, grandTotalTextView;
+    float grandTotal;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,9 +83,13 @@ public class TransactionActivity extends AppCompatActivity {
         grandTotalTextView  = findViewById(R.id.invoice_gtotal);
 
         discountEditText.addTextChangedListener(new TextWatcher() {
+            float testGrandTotal = 0;
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                CalculateTotal();
+                if (grandTotal != testGrandTotal) { // done to prevent self loop
+                    CalculateTotal();
+                    testGrandTotal = grandTotal;
+                }
             }
             @Override public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
             @Override public void afterTextChanged(Editable editable) { }
@@ -91,6 +111,29 @@ public class TransactionActivity extends AppCompatActivity {
                 startActivityForResult(t,ITEM_ADD_ACTIVITY_REQUEST_CODE );
             }
         });
+
+        // Date Field
+        final Calendar calendar = Calendar.getInstance();
+        final EditText dateField = findViewById(R.id.invoice_dateField);
+        dateField.setText(Converters.getDateFormat().format(calendar.getTime()));
+        dateField.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new DatePickerDialog(TransactionActivity.this, new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker datePicker, int year, int month, int day) {
+                        calendar.set(Calendar.YEAR, year);
+                        calendar.set(Calendar.MONTH, month);
+                        calendar.set(Calendar.DAY_OF_MONTH, day);
+
+                        SimpleDateFormat sdf = Converters.getDateFormat();
+                        dateField.setText(sdf.format(calendar.getTime()));
+                        dateField.setTag(calendar.getTime());
+                    }
+                }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
+            }
+        });
+
 
         // Recycler View
         itemsAdapter = new ItemsAdapter(new ArrayList<InvoiceItem>());
@@ -159,13 +202,64 @@ public class TransactionActivity extends AppCompatActivity {
                     tot += Math.round(i.qty * i.price * 100) / 100;
                 }
                 final float total = tot;
-                final float grandTotal = total - discount;
+                grandTotal = total - discount;
+                // edit the discount edittext only after setting the global grandTotal
                 new Handler(getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
                         discountEditText.setText(String.format(Locale.ENGLISH, "%.2f", discount));
                         totalTextView.setText(String.format(Locale.ENGLISH, "%.2f", total));
                         grandTotalTextView.setText(String.format(Locale.ENGLISH, "%.2f", grandTotal));
+                    }
+                });
+            }
+        }).start();
+    }
+
+    public void Save(View v) {
+        LoadingActivity.Start(this);
+        final Invoice t = new Invoice();
+
+        EditText dateField = findViewById(R.id.invoice_dateField);
+        EditText customerField = findViewById(R.id.invoice_customer);
+
+        final int last_invoice_no = PreferenceManager.getDefaultSharedPreferences(this).getInt("last_invoice_no", 0);
+        String invoice_format = PreferenceManager.getDefaultSharedPreferences(this).getString("invoice_no_template", "SINV-VEHICLEA-%5d");
+        t.invoice_no = String.format(invoice_format, last_invoice_no + 1);
+        t.grand_total = grandTotal;
+        Log.d("SINV", "Generated Invoice No : " + t.invoice_no);
+
+        SimpleDateFormat sdf = Converters.getDateFormat();
+        try {
+            t.date = sdf.parse(dateField.getText().toString());
+            t.customer_name = customerField.getText().toString();
+        } catch (Exception e) {
+            if (e instanceof ParseException)
+                new AlertDialog.Builder(this).setMessage("Please set the Date").setPositiveButton("OK", null).show();
+
+            LoadingActivity.Stop(this);
+            return;
+        }
+        new Thread(new Runnable() {
+            @SuppressLint("ApplySharedPref")
+            @Override
+            public void run() {
+
+                for(InvoiceItem i : itemsAdapter.items)
+                    i.invoiceNo = t.invoice_no;
+
+                AppDatabase.Instance.invoiceDao().Insert(t, itemsAdapter.items.toArray(new InvoiceItem[itemsAdapter.items.size()]));
+                PreferenceManager.getDefaultSharedPreferences(TransactionActivity.this).edit().putInt("last_invoice_no", last_invoice_no + 1).commit();
+                new Handler(getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        LoadingActivity.Stop(TransactionActivity.this);
+                        Snackbar.make(getWindow().getDecorView().getRootView(), "Invoice Saved Successfully", Snackbar.LENGTH_SHORT).show();
+
+                        Intent result = new Intent();
+                        result.putExtra("Invoice", t);
+                        setResult(CommonStatusCodes.SUCCESS, result);
+                        finish();
                     }
                 });
             }

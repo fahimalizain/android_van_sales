@@ -7,7 +7,6 @@ import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,12 +14,9 @@ import android.widget.TextView;
 
 import com.casualmill.vansales.R;
 import com.casualmill.vansales.data.AppDatabase;
-import com.casualmill.vansales.data.DummyData;
 import com.casualmill.vansales.data.models.Item;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class ItemFragment extends Fragment {
 
@@ -94,10 +90,10 @@ public class ItemFragment extends Fragment {
 
             public Holder(View itemView) {
                 super(itemView);
-                this.itemCode = itemView.findViewById(R.id.listitem_item_itemCode);
-                this.itemName = itemView.findViewById(R.id.listitem_item_itemName);
-                this.barCode = itemView.findViewById(R.id.listitem_item_barCode);
-                this.price = itemView.findViewById(R.id.listitem_item_price);
+                this.itemCode = itemView.findViewById(R.id.listitem_invoice_no);
+                this.itemName = itemView.findViewById(R.id.listitem_invoice_customer);
+                this.barCode = itemView.findViewById(R.id.listitem_invoice_date);
+                this.price = itemView.findViewById(R.id.listitem_invoice_gtotal);
                 this.qty = itemView.findViewById(R.id.listitem_item_qty);
 
             }

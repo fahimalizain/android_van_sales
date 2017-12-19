@@ -24,7 +24,7 @@ public class InvoiceItem {
     public int uid;
 
     @ColumnInfo(name = "invoice_no")
-    public int invoiceNo;
+    public String invoiceNo;
 
     @ColumnInfo(name = "item_code")
     public String itemCode;

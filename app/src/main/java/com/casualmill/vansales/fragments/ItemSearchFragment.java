@@ -143,10 +143,10 @@ public class ItemSearchFragment extends Fragment implements FragmentLifecycle {
             Holder(View itemView) {
                 super(itemView);
                 itemView.setOnClickListener(this);
-                this.itemCode = itemView.findViewById(R.id.listitem_item_itemCode);
-                this.itemName = itemView.findViewById(R.id.listitem_item_itemName);
-                this.barCode = itemView.findViewById(R.id.listitem_item_barCode);
-                this.price = itemView.findViewById(R.id.listitem_item_price);
+                this.itemCode = itemView.findViewById(R.id.listitem_invoice_no);
+                this.itemName = itemView.findViewById(R.id.listitem_invoice_customer);
+                this.barCode = itemView.findViewById(R.id.listitem_invoice_date);
+                this.price = itemView.findViewById(R.id.listitem_invoice_gtotal);
                 this.qty = itemView.findViewById(R.id.listitem_item_qty);
             }
 
