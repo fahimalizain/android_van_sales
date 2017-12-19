@@ -12,7 +12,7 @@ import java.util.List;
 public interface InvoiceItemDao {
 
     @Query("SELECT * FROM invoice_items WHERE invoice_no = :invoice_no")
-    List<InvoiceItem> get_all_for_invoice_no(int invoice_no);
+    List<InvoiceItem> get_all_for_invoice_no(String invoice_no);
 
     @Insert
     void InsertAll(InvoiceItem... items);

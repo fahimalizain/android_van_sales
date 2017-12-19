@@ -14,28 +14,19 @@ import java.util.List;
  */
 
 @Entity(tableName = "invoice_items",
-        indices = {@Index("invoice_no")},
-        foreignKeys = @ForeignKey(entity = Invoice.class,
-                parentColumns = "invoice_no", childColumns = "invoice_no",
-                onDelete = ForeignKey.CASCADE, onUpdate = ForeignKey.CASCADE))
-public class InvoiceItem {
-
-    @PrimaryKey(autoGenerate = true)
-    public int uid;
+        indices = {@Index("invoice_no"), @Index("item_code")},
+        foreignKeys = {
+                        @ForeignKey(entity = Invoice.class,
+                            parentColumns = "invoice_no", childColumns = "invoice_no",
+                            onDelete = ForeignKey.CASCADE, onUpdate = ForeignKey.CASCADE),
+                        @ForeignKey(entity = Item.class,
+                                parentColumns = "item_code", childColumns = "item_code",
+                                onDelete = ForeignKey.CASCADE, onUpdate = ForeignKey.CASCADE)
+        }, inheritSuperIndices = false) // dont want item_code unique here
+public class InvoiceItem extends Item {
 
     @ColumnInfo(name = "invoice_no")
     public String invoiceNo;
-
-    @ColumnInfo(name = "item_code")
-    public String itemCode;
-
-    @Ignore
-    public List<UOM> UnitDetails;
-
-    @Ignore
-    public String itemName;
-    @Ignore
-    public String barcode;
 
     public float qty;
 

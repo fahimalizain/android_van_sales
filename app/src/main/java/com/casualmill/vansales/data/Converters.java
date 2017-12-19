@@ -20,6 +20,10 @@ public class Converters {
         return String.format(Locale.ENGLISH, "$%.2f", f);
     }
 
+    public static String toString(float f, int places) {
+        return String.format(Locale.ENGLISH, "%." + places +"f", f);
+    }
+
     public static Float fromString(String s) {
         return s.isEmpty() ? 0 : Float.valueOf(s);
     }
