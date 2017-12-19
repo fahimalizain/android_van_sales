@@ -20,6 +20,15 @@ public class Converters {
         return String.format(Locale.ENGLISH, "$%.2f", f);
     }
 
+    public static Float fromString(String s) {
+        return s.isEmpty() ? 0 : Float.valueOf(s);
+    }
+
+    public static Float roundFloat(float f, int places) {
+        // math.pow returns double
+        return Math.round( f * (float)Math.pow(10, places)) / ((float) Math.pow(10, places));
+    }
+
     @TypeConverter
     public static Date dateFromTimeStamp(Long value) {
         return value == null ? null : new Date(value);

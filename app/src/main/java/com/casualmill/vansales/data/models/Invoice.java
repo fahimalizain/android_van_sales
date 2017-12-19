@@ -22,5 +22,6 @@ public class Invoice implements Serializable {
 
     public String customer_name;
 
+    public float discount;
     public float grand_total;
 }
