@@ -33,6 +33,7 @@ import com.casualmill.vansales.R;
 import com.casualmill.vansales.animation.ResizeAnimation;
 import com.casualmill.vansales.data.AppDatabase;
 import com.casualmill.vansales.data.Converters;
+import com.casualmill.vansales.data.DataHelper;
 import com.casualmill.vansales.data.models.Invoice;
 import com.casualmill.vansales.data.models.InvoiceItem;
 import com.casualmill.vansales.data.models.Item;
@@ -53,16 +54,20 @@ public class TransactionActivity extends AppCompatActivity {
     public static int ITEM_ADD_ACTIVITY_REQUEST_CODE = 59;
     private ItemsAdapter itemsAdapter;
     private ItemsAdapter.Holder expandedHolder = null;
-    private EditText discountEditText;
+    private EditText discountEditText, dateEditText, customerEditText;
     private TextView totalTextView, grandTotalTextView;
+    private Button addItemButton, saveButton, cancelButton;
+
+    public enum UIMode {READ, EDIT}
     float grandTotal;
+    Invoice currentInvoice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_transaction);
 
-        Load(getIntent().getIntExtra("type", 0));
+        Load();
     }
 
     @Override
@@ -71,13 +76,15 @@ public class TransactionActivity extends AppCompatActivity {
         return true;
     }
 
-    private void Load(int type) {
+    private void Load() {
         // Type
         // 0 - Invoice
         // 1 - Transfer
         Toolbar b = findViewById(R.id.transaction_toolbar);
         setSupportActionBar(b);
 
+        dateEditText = findViewById(R.id.invoice_dateField);
+        customerEditText = findViewById(R.id.invoice_customer);
         discountEditText = findViewById(R.id.invoice_discount);
         totalTextView = findViewById(R.id.invoice_total);
         grandTotalTextView  = findViewById(R.id.invoice_gtotal);
@@ -99,8 +106,10 @@ public class TransactionActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         // Add Item
-        Button add_item_button = findViewById(R.id.invoice_add_item);
-        add_item_button.setOnClickListener(new View.OnClickListener() {
+        addItemButton = findViewById(R.id.invoice_add_item);
+        saveButton = findViewById(R.id.invoice_saveButton);
+        cancelButton = findViewById(R.id.invoice_cancelButton);
+        addItemButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent t = new Intent(TransactionActivity.this, ItemSearchActivity.class);
@@ -110,9 +119,8 @@ public class TransactionActivity extends AppCompatActivity {
 
         // Date Field
         final Calendar calendar = Calendar.getInstance();
-        final EditText dateField = findViewById(R.id.invoice_dateField);
-        dateField.setText(Converters.getDateFormat().format(calendar.getTime()));
-        dateField.setOnClickListener(new View.OnClickListener() {
+        dateEditText.setText(Converters.getDateFormat().format(calendar.getTime()));
+        dateEditText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 new DatePickerDialog(TransactionActivity.this, new DatePickerDialog.OnDateSetListener() {
@@ -123,8 +131,8 @@ public class TransactionActivity extends AppCompatActivity {
                         calendar.set(Calendar.DAY_OF_MONTH, day);
 
                         SimpleDateFormat sdf = Converters.getDateFormat();
-                        dateField.setText(sdf.format(calendar.getTime()));
-                        dateField.setTag(calendar.getTime());
+                        dateEditText.setText(sdf.format(calendar.getTime()));
+                        dateEditText.setTag(calendar.getTime());
                     }
                 }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
             }
@@ -149,6 +157,57 @@ public class TransactionActivity extends AppCompatActivity {
             }
         };
         new ItemTouchHelper(simpleCallback).attachToRecyclerView(r);
+
+        // Load Invoice
+        if (getIntent().hasExtra(InvoiceFragment.InvoiceExtraKey))
+        {
+            currentInvoice = ((Invoice) getIntent().getSerializableExtra(InvoiceFragment.InvoiceExtraKey));
+            LoadInvoice(currentInvoice);
+            SetUiMode(UIMode.READ);
+        } else
+            SetUiMode(UIMode.EDIT);
+    }
+
+    private void SetUiMode(UIMode mode) {
+        Boolean enabled = mode != UIMode.READ;
+        dateEditText.setEnabled(enabled);
+        customerEditText.setEnabled(enabled);
+        discountEditText.setEnabled(enabled);
+        saveButton.setVisibility(mode == UIMode.EDIT ? View.VISIBLE : View.INVISIBLE);
+        cancelButton.setVisibility(saveButton.getVisibility());
+        addItemButton.setVisibility(saveButton.getVisibility());
+    }
+
+    private void LoadInvoice(final Invoice inv) {
+        LoadingActivity.Start(this);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(1500); // prevent Load on CPU
+                    final List<InvoiceItem> items = AppDatabase.Instance.invoiceItemDao().get_all_for_invoice_no(inv.invoice_no);
+                    for (InvoiceItem t : items)
+                        DataHelper.fillItem(t);
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            itemsAdapter.items = items;
+                            itemsAdapter.notifyDataSetChanged();
+                            dateEditText.setText(Converters.getDateFormat().format(inv.date));
+                            customerEditText.setText(inv.customer_name);
+                            discountEditText.setText(Converters.toString(inv.discount, 2));
+                            CalculateTotal();
+
+                            LoadingActivity.Stop(TransactionActivity.this);
+                        }
+                    });
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     @Override
@@ -263,7 +322,7 @@ public class TransactionActivity extends AppCompatActivity {
                         Snackbar.make(getWindow().getDecorView().getRootView(), "Invoice Saved", Snackbar.LENGTH_LONG).show();
 
                         Intent result = new Intent();
-                        result.putExtra("Invoice", t);
+                        result.putExtra(InvoiceFragment.InvoiceExtraKey, t);
                         setResult(InvoiceFragment.TRANSACTION_SUCCESS_RESULT_CODE, result);
                         finish();
                     }
@@ -271,6 +330,10 @@ public class TransactionActivity extends AppCompatActivity {
                 Log.d(TAG, "Invoice Successfully Saved");
             }
         }).start();
+    }
+
+    public void Cancel(View view) {
+        finish();
     }
 
     public class ItemsAdapter extends RecyclerView.Adapter<TransactionActivity.ItemsAdapter.Holder> {

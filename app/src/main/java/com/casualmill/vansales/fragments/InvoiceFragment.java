@@ -28,6 +28,7 @@ public class InvoiceFragment extends Fragment {
     private static final int NEW_INVOICE_REQUEST_CODE = 10;
     private static final int EDIT_INVOICE_REQUEST_CODE = 20;
     public static final int TRANSACTION_SUCCESS_RESULT_CODE = 25;
+    public static final String InvoiceExtraKey = "INVOICE";
     private InvoiceAdapter invoiceAdapter;
 
     public InvoiceFragment() {
@@ -74,13 +75,19 @@ public class InvoiceFragment extends Fragment {
         return v;
     }
 
+    private void OpenInvoice(Invoice in) {
+        Intent intent = new Intent(getActivity(), TransactionActivity.class);
+        intent.putExtra(InvoiceExtraKey, in);
+        startActivityForResult(intent, EDIT_INVOICE_REQUEST_CODE);
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if (resultCode != TRANSACTION_SUCCESS_RESULT_CODE)
+        if (resultCode != TRANSACTION_SUCCESS_RESULT_CODE || !data.hasExtra(InvoiceExtraKey))
             return;
 
-        Invoice t = ((Invoice) data.getSerializableExtra("Invoice"));
+        Invoice t = ((Invoice) data.getSerializableExtra(InvoiceExtraKey));
         switch (requestCode) {
             case NEW_INVOICE_REQUEST_CODE:
                 invoiceAdapter.items.add(t);
@@ -113,6 +120,7 @@ public class InvoiceFragment extends Fragment {
             holder.customer_name.setText(invoice.customer_name);
             holder.date.setText(Converters.getDateFormat().format(invoice.date));
             holder.gTotal.setText(Converters.toCurrency(invoice.grand_total));
+            holder.invoice = invoice;
         }
 
         @Override
@@ -120,17 +128,23 @@ public class InvoiceFragment extends Fragment {
             return items.size();
         }
 
-        class Holder extends RecyclerView.ViewHolder {
+        class Holder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
             TextView invoice_no, customer_name, date, gTotal;
+            Invoice invoice;
 
             Holder(View itemView) {
                 super(itemView);
-
+                itemView.setOnClickListener(this);
                 invoice_no = itemView.findViewById(R.id.listitem_invoice_no);
                 customer_name = itemView.findViewById(R.id.listitem_invoice_customer);
                 date = itemView.findViewById(R.id.listitem_invoice_date);
                 gTotal = itemView.findViewById(R.id.listitem_invoice_gtotal);
+            }
+
+            @Override
+            public void onClick(View view) {
+                OpenInvoice(invoice);
             }
         }
     }
