@@ -18,7 +18,7 @@ namespace test_server
             {
                 TcpListener listener = new TcpListener(new IPEndPoint(IPAddress.Any, 8000));                
                 listener.Start();
-                Console.WriteLine("Started Listening..");
+                Console.WriteLine("Listening on Port 8000...");
                 while (true)
                 {
                     if (_cancel.IsCancellationRequested)
@@ -70,14 +70,12 @@ namespace test_server
         {
             // Initial 4 byte (int) as size of the rest of string
             byte[] response = new byte[4];
-            int receivedSize = s.Receive(response, 4, SocketFlags.None);
-            CheckSize(4, receivedSize);
+            response = s.ReceiveLargeFile(4);          
                         
             int expectedSize = getInt(response);
             response = new byte[expectedSize];
 
-            receivedSize = s.Receive(response, expectedSize, SocketFlags.None);
-            CheckSize(expectedSize, receivedSize);
+            response = s.ReceiveLargeFile(expectedSize);            
             // Big Endian
             string data = getString(response);
 
@@ -122,7 +120,7 @@ namespace test_server
         static byte[] getBytes(string data)
         {
             return Encoding.BigEndianUnicode.GetBytes(data);
-        }
+        }        
 
         static JObject getTestData()
         {
