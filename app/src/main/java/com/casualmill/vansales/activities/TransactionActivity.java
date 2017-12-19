@@ -83,13 +83,9 @@ public class TransactionActivity extends AppCompatActivity {
         grandTotalTextView  = findViewById(R.id.invoice_gtotal);
 
         discountEditText.addTextChangedListener(new TextWatcher() {
-            float testGrandTotal = 0;
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (grandTotal != testGrandTotal) { // done to prevent self loop
-                    CalculateTotal();
-                    testGrandTotal = grandTotal;
-                }
+                CalculateTotal();
             }
             @Override public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
             @Override public void afterTextChanged(Editable editable) { }
@@ -207,7 +203,6 @@ public class TransactionActivity extends AppCompatActivity {
                 new Handler(getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
-                        discountEditText.setText(String.format(Locale.ENGLISH, "%.2f", discount));
                         totalTextView.setText(String.format(Locale.ENGLISH, "%.2f", total));
                         grandTotalTextView.setText(String.format(Locale.ENGLISH, "%.2f", grandTotal));
                     }
