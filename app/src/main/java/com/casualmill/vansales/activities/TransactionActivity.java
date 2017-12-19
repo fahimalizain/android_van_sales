@@ -56,7 +56,7 @@ public class TransactionActivity extends AppCompatActivity {
     private ItemsAdapter.Holder expandedHolder = null;
     private EditText discountEditText, dateEditText, customerEditText;
     private TextView totalTextView, grandTotalTextView;
-    private Button addItemButton, saveButton, cancelButton;
+    private Button addItemButton, saveButton, cancelButton, editButton;
 
     public enum UIMode {READ, EDIT}
     float grandTotal;
@@ -109,6 +109,7 @@ public class TransactionActivity extends AppCompatActivity {
         addItemButton = findViewById(R.id.invoice_add_item);
         saveButton = findViewById(R.id.invoice_saveButton);
         cancelButton = findViewById(R.id.invoice_cancelButton);
+        editButton = findViewById(R.id.invoice_editButton);
         addItemButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -174,6 +175,7 @@ public class TransactionActivity extends AppCompatActivity {
         customerEditText.setEnabled(enabled);
         discountEditText.setEnabled(enabled);
         saveButton.setVisibility(mode == UIMode.EDIT ? View.VISIBLE : View.INVISIBLE);
+        editButton.setVisibility(mode == UIMode.READ ? View.VISIBLE : View.INVISIBLE);
         cancelButton.setVisibility(saveButton.getVisibility());
         addItemButton.setVisibility(saveButton.getVisibility());
     }
@@ -330,6 +332,10 @@ public class TransactionActivity extends AppCompatActivity {
                 Log.d(TAG, "Invoice Successfully Saved");
             }
         }).start();
+    }
+
+    public void Edit(View v) {
+        SetUiMode(UIMode.EDIT);
     }
 
     public void Cancel(View view) {
