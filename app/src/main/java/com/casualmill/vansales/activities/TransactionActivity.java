@@ -277,14 +277,15 @@ public class TransactionActivity extends AppCompatActivity {
 
     public void Save(View v) {
         LoadingActivity.Start(this);
-        final Invoice t = new Invoice();
+        final Invoice t = currentInvoice == null ? new Invoice() : currentInvoice;
+        final Boolean editing = currentInvoice != null;
 
         EditText dateField = findViewById(R.id.invoice_dateField);
         EditText customerField = findViewById(R.id.invoice_customer);
 
         final int last_invoice_no = PreferenceManager.getDefaultSharedPreferences(this).getInt("last_invoice_no", 0);
         String invoice_format = PreferenceManager.getDefaultSharedPreferences(this).getString("invoice_no_template", "SINV-VEHICLEA-%5d");
-        t.invoice_no = String.format(invoice_format, last_invoice_no + 1).replace(' ', '0');
+        t.invoice_no = editing ? t.invoice_no :  String.format(invoice_format, last_invoice_no + 1).replace(' ', '0');
         Log.d(TAG, "Generated Invoice No to Save : " + t.invoice_no);
 
         SimpleDateFormat sdf = Converters.getDateFormat();
@@ -315,8 +316,10 @@ public class TransactionActivity extends AppCompatActivity {
                 for(InvoiceItem i : itemsAdapter.items)
                     i.invoiceNo = t.invoice_no;
 
-                AppDatabase.Instance.invoiceDao().Insert(t, itemsAdapter.items.toArray(new InvoiceItem[itemsAdapter.items.size()]));
-                PreferenceManager.getDefaultSharedPreferences(TransactionActivity.this).edit().putInt("last_invoice_no", last_invoice_no + 1).commit();
+                // editing - update
+                AppDatabase.Instance.invoiceDao().Insert(t, itemsAdapter.items.toArray(new InvoiceItem[itemsAdapter.items.size()]), editing);
+                if (!editing) // increment only if new invoice
+                    PreferenceManager.getDefaultSharedPreferences(TransactionActivity.this).edit().putInt("last_invoice_no", last_invoice_no + 1).commit();
                 new Handler(getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {

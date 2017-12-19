@@ -5,6 +5,7 @@ import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Transaction;
+import android.arch.persistence.room.Update;
 
 import com.casualmill.vansales.data.AppDatabase;
 import com.casualmill.vansales.data.models.Invoice;
@@ -24,12 +25,19 @@ public abstract class InvoiceDao {
     @Insert
     public abstract void Insert(Invoice invoice);
 
+    @Update
+    public abstract void Update(Invoice invoice);
+
     @Delete
     public abstract void Delete(Invoice invoice);
 
     @Transaction
-    public void Insert(Invoice invoice, InvoiceItem[] invoices) {
-        Insert(invoice);
+    public void Insert(Invoice invoice, InvoiceItem[] invoices, Boolean update) {
+        if (update) {
+            AppDatabase.Instance.invoiceItemDao().Delete(invoice.invoice_no);
+            Update(invoice);
+        } else
+            Insert(invoice);
         AppDatabase.Instance.invoiceItemDao().InsertAll(invoices);
     }
 }

@@ -87,14 +87,21 @@ public class InvoiceFragment extends Fragment {
         if (resultCode != TRANSACTION_SUCCESS_RESULT_CODE || !data.hasExtra(InvoiceExtraKey))
             return;
 
-        Invoice t = ((Invoice) data.getSerializableExtra(InvoiceExtraKey));
+        final Invoice t = ((Invoice) data.getSerializableExtra(InvoiceExtraKey));
         switch (requestCode) {
             case NEW_INVOICE_REQUEST_CODE:
                 invoiceAdapter.items.add(t);
                 invoiceAdapter.notifyItemInserted(invoiceAdapter.items.size() - 1);
                 break;
             case EDIT_INVOICE_REQUEST_CODE:
-                invoiceAdapter.notifyItemChanged(invoiceAdapter.items.indexOf(t));
+                for (int i = 0; i < invoiceAdapter.items.size(); i++) { // object reference is lost (serialization copies ?)
+                    if (invoiceAdapter.items.get(i).invoice_no.contentEquals(t.invoice_no)) {
+                        invoiceAdapter.items.remove(i);
+                        invoiceAdapter.items.add(i, t);
+                        invoiceAdapter.notifyItemChanged(i);
+                        break;
+                    }
+                }
                 break;
         }
     }

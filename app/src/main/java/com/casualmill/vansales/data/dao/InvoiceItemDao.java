@@ -17,4 +17,6 @@ public interface InvoiceItemDao {
     @Insert
     void InsertAll(InvoiceItem... items);
 
+    @Query("DELETE FROM invoice_items WHERE invoice_no = :invoice_no")
+    void Delete(String invoice_no);
 }
