@@ -19,6 +19,7 @@ import com.casualmill.vansales.data.AppDatabase;
 import com.casualmill.vansales.data.Converters;
 import com.casualmill.vansales.data.models.Invoice;
 import com.casualmill.vansales.data.models.Item;
+import com.google.android.gms.common.api.CommonStatusCodes;
 
 import java.util.List;
 
@@ -26,6 +27,7 @@ public class InvoiceFragment extends Fragment {
 
     private static final int NEW_INVOICE_REQUEST_CODE = 10;
     private static final int EDIT_INVOICE_REQUEST_CODE = 20;
+    public static final int TRANSACTION_SUCCESS_RESULT_CODE = 25;
     private InvoiceAdapter invoiceAdapter;
 
     public InvoiceFragment() {
@@ -74,6 +76,10 @@ public class InvoiceFragment extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (resultCode != TRANSACTION_SUCCESS_RESULT_CODE)
+            return;
+
         Invoice t = ((Invoice) data.getSerializableExtra("Invoice"));
         switch (requestCode) {
             case NEW_INVOICE_REQUEST_CODE:

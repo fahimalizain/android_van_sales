@@ -254,14 +254,15 @@ public class TransactionActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         LoadingActivity.Stop(TransactionActivity.this);
-                        Snackbar.make(getWindow().getDecorView().getRootView(), "Invoice Saved Successfully", Snackbar.LENGTH_SHORT).show();
+                        Snackbar.make(getWindow().getDecorView().getRootView(), "Invoice Saved", Snackbar.LENGTH_LONG).show();
 
                         Intent result = new Intent();
                         result.putExtra("Invoice", t);
-                        setResult(CommonStatusCodes.SUCCESS, result);
+                        setResult(InvoiceFragment.TRANSACTION_SUCCESS_RESULT_CODE, result);
                         finish();
                     }
                 });
+                Log.d(TAG, "Invoice Successfully Saved");
             }
         }).start();
     }
