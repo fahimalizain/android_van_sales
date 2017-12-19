@@ -181,7 +181,7 @@ public class TransactionActivity extends AppCompatActivity {
     }
 
     private void LoadInvoice(final Invoice inv) {
-        LoadingActivity.Start(this);
+        LoadingActivity.IncrementLoading();
 
         new Thread(new Runnable() {
             @Override
@@ -202,7 +202,7 @@ public class TransactionActivity extends AppCompatActivity {
                             discountEditText.setText(Converters.toString(inv.discount, 2));
                             CalculateTotal();
 
-                            LoadingActivity.Stop(TransactionActivity.this);
+                            LoadingActivity.DecrementLoading();
                         }
                     });
                 } catch (InterruptedException e) {
@@ -276,7 +276,7 @@ public class TransactionActivity extends AppCompatActivity {
     }
 
     public void Save(View v) {
-        LoadingActivity.Start(this);
+        LoadingActivity.IncrementLoading();
         final Invoice t = currentInvoice == null ? new Invoice() : currentInvoice;
         final Boolean editing = currentInvoice != null;
 
@@ -298,7 +298,7 @@ public class TransactionActivity extends AppCompatActivity {
             if (e instanceof ParseException)
                 new AlertDialog.Builder(this).setMessage("Please set the Date").setPositiveButton("OK", null).show();
 
-            LoadingActivity.Stop(this);
+            LoadingActivity.DecrementLoading();
             return;
         }
         new Thread(new Runnable() {
@@ -323,7 +323,7 @@ public class TransactionActivity extends AppCompatActivity {
                 new Handler(getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
-                        LoadingActivity.Stop(TransactionActivity.this);
+                        LoadingActivity.DecrementLoading();
                         Snackbar.make(getWindow().getDecorView().getRootView(), "Invoice Saved", Snackbar.LENGTH_LONG).show();
 
                         Intent result = new Intent();

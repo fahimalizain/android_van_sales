@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.provider.Telephony;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,12 +13,16 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.casualmill.vansales.R;
+import com.casualmill.vansales.activities.LoadingActivity;
 import com.casualmill.vansales.activities.TransactionActivity;
 import com.casualmill.vansales.data.AppDatabase;
 import com.casualmill.vansales.data.Converters;
 import com.casualmill.vansales.data.models.Invoice;
-import com.casualmill.vansales.data.models.Item;
-import com.google.android.gms.common.api.CommonStatusCodes;
+import com.casualmill.vansales.support.MainActivityEvent;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.List;
 
@@ -30,6 +33,7 @@ public class InvoiceFragment extends Fragment {
     public static final int TRANSACTION_SUCCESS_RESULT_CODE = 25;
     public static final String InvoiceExtraKey = "INVOICE";
     private InvoiceAdapter invoiceAdapter;
+    private RecyclerView recyclerView;
 
     public InvoiceFragment() {
         // Required empty public constructor
@@ -47,6 +51,12 @@ public class InvoiceFragment extends Fragment {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_invoice, container, false);
 
+        LoadUI(v);
+        LoadData();
+        return v;
+    }
+
+    private void LoadUI(View v) {
         v.findViewById(R.id.invoice_fab).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -56,9 +66,16 @@ public class InvoiceFragment extends Fragment {
         });
 
         // RecyclerView Setup
-        final RecyclerView rv = v.findViewById(R.id.invoice_recyclerView);
-        rv.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView = v.findViewById(R.id.invoice_recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+    }
 
+    private void LoadData() {
+
+        if (recyclerView == null) // UI not loaded
+            return;
+
+        LoadingActivity.IncrementLoading();
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -67,12 +84,12 @@ public class InvoiceFragment extends Fragment {
                     @Override
                     public void run() {
                         invoiceAdapter = new InvoiceAdapter(items);
-                        rv.setAdapter(invoiceAdapter);
+                        recyclerView.setAdapter(invoiceAdapter);
+                        LoadingActivity.DecrementLoading();
                     }
                 });
             }
         }).start();
-        return v;
     }
 
     private void OpenInvoice(Invoice in) {
@@ -104,6 +121,24 @@ public class InvoiceFragment extends Fragment {
                 }
                 break;
         }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMainActivityEvent(MainActivityEvent event) {
+        if (event.type == MainActivityEvent.EventType.Refresh)
+            LoadData();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
     }
 
     class InvoiceAdapter extends RecyclerView.Adapter<InvoiceAdapter.Holder> {

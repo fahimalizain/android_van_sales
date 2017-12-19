@@ -13,14 +13,20 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.casualmill.vansales.R;
+import com.casualmill.vansales.activities.LoadingActivity;
 import com.casualmill.vansales.data.AppDatabase;
 import com.casualmill.vansales.data.models.Item;
+import com.casualmill.vansales.support.MainActivityEvent;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.List;
 
 public class ItemFragment extends Fragment {
 
-    private RecyclerView recyclerView;
+    RecyclerView recyclerView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -28,16 +34,23 @@ public class ItemFragment extends Fragment {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_item, container, false);
 
-        Load(v);
+        LoadUI(v);
+        LoadData();
         return v;
     }
 
-    private void Load(View v) {
-
+    private void LoadUI(View v) {
         recyclerView = v.findViewById(R.id.item_recyclerView);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+    }
 
+    private void LoadData() {
+
+        if (recyclerView == null) // UI not loaded
+            return;
+
+        LoadingActivity.IncrementLoading();
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -47,10 +60,29 @@ public class ItemFragment extends Fragment {
                     public void run() {
                         ItemAdapter adapter = new ItemAdapter(items);
                         recyclerView.setAdapter(adapter);
+                        LoadingActivity.DecrementLoading();
                     }
                 });
             }
         }).start();
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMainActivityEvent(MainActivityEvent event) {
+        if (event.type == MainActivityEvent.EventType.Refresh)
+            LoadData();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
     }
 
 

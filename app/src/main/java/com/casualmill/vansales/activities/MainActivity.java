@@ -17,51 +17,18 @@ import android.view.MenuItem;
 import com.casualmill.vansales.R;
 import com.casualmill.vansales.data.AppDatabase;
 import com.casualmill.vansales.data.SyncData;
+import com.casualmill.vansales.support.MainActivityEvent;
 import com.casualmill.vansales.fragments.InvoiceFragment;
 import com.casualmill.vansales.fragments.ItemFragment;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 public class MainActivity extends AppCompatActivity {
 
     private ViewPager viewPager;
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inf = getMenuInflater();
-        inf.inflate(R.menu.main_options, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_sync :
-                SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-                new SyncData(this).execute(sp.getString("server_address", "10.0.2.2:18565"), sp.getString("vehicle_id", "VAN12345"));
-                break;
-            case R.id.menu_settings :
-                Intent in = new Intent(this, SettingsActivity.class);
-                startActivity(in);
-                break;
-        }
-        return true;
-    }
-
-    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
-            = new BottomNavigationView.OnNavigationItemSelectedListener() {
-
-        @Override
-        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.navigation_sales:
-                    viewPager.setCurrentItem(0);
-                    return true;
-                case R.id.navigation_items:
-                    viewPager.setCurrentItem(1);
-                    return true;
-            }
-            return false;
-        }
-    };
+    private int loadingCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,4 +97,72 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inf = getMenuInflater();
+        inf.inflate(R.menu.main_options, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_refresh:
+                EventBus.getDefault().post(new MainActivityEvent(MainActivityEvent.EventType.Refresh));
+                break;
+            case R.id.menu_sync :
+                SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+                new SyncData(this).execute(sp.getString("server_address", "10.0.2.2:18565"), sp.getString("vehicle_id", "VAN12345"));
+                break;
+            case R.id.menu_settings :
+                Intent in = new Intent(this, SettingsActivity.class);
+                startActivity(in);
+                break;
+        }
+        return true;
+    }
+
+    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
+            = new BottomNavigationView.OnNavigationItemSelectedListener() {
+
+        @Override
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.navigation_sales:
+                    viewPager.setCurrentItem(0);
+                    return true;
+                case R.id.navigation_items:
+                    viewPager.setCurrentItem(1);
+                    return true;
+            }
+            return false;
+        }
+    };
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public synchronized void onMainActivityEvent(MainActivityEvent event) {
+        if (event.type == MainActivityEvent.EventType.START_LOADING)
+        {
+            if (loadingCount == 0)
+                LoadingActivity.Start(this);
+            loadingCount++;
+        } else if (event.type == MainActivityEvent.EventType.STOP_LOADING) {
+            loadingCount = Math.max(0,loadingCount - 1);
+            if (loadingCount == 0)
+                LoadingActivity.Stop(this);
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
+    }
 }
+

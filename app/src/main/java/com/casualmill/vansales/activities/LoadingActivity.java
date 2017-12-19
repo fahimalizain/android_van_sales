@@ -6,6 +6,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.casualmill.vansales.R;
+import com.casualmill.vansales.support.MainActivityEvent;
+
+import org.greenrobot.eventbus.EventBus;
 
 public class LoadingActivity extends AppCompatActivity {
 
@@ -19,6 +22,8 @@ public class LoadingActivity extends AppCompatActivity {
     protected void onNewIntent(Intent intent)
     {
         super.onNewIntent(intent);
+        if (intent == null || intent.getExtras() == null)
+            return;
         boolean keep = intent.getExtras().getBoolean("keep", true);
         if(!keep)
         {
@@ -44,5 +49,13 @@ public class LoadingActivity extends AppCompatActivity {
 
     public static void Stop(Context ctx) {
         ctx.startActivity(getIntent(ctx).putExtra("keep", false));
+    }
+
+    public static void IncrementLoading() {
+        EventBus.getDefault().post(new MainActivityEvent(MainActivityEvent.EventType.START_LOADING));
+    }
+
+    public static void DecrementLoading() {
+        EventBus.getDefault().post(new MainActivityEvent(MainActivityEvent.EventType.STOP_LOADING));
     }
 }

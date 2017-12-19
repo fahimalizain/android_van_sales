@@ -1,7 +1,6 @@
 package com.casualmill.vansales.data;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
@@ -9,7 +8,9 @@ import android.widget.Toast;
 import com.casualmill.vansales.activities.LoadingActivity;
 import com.casualmill.vansales.data.models.Item;
 import com.casualmill.vansales.data.models.UOM;
+import com.casualmill.vansales.support.MainActivityEvent;
 
+import org.greenrobot.eventbus.EventBus;
 import org.json.JSONObject;
 
 import java.io.DataInputStream;
@@ -37,15 +38,15 @@ public class SyncData extends AsyncTask<String, Void, Boolean> {
     protected void onPreExecute() {
         super.onPreExecute();
 
-        LoadingActivity.Start(ctx.get());
+        LoadingActivity.IncrementLoading();
     }
 
     @Override
     protected void onPostExecute(Boolean aBool) {
         super.onPostExecute(aBool);
-        LoadingActivity.Stop(ctx.get());
-
+        EventBus.getDefault().post(new MainActivityEvent(MainActivityEvent.EventType.Refresh));
         Toast.makeText(ctx.get(), aBool ? "Sync Successful" : "Sync Failed. Please try again.", Toast.LENGTH_SHORT).show();
+        LoadingActivity.DecrementLoading();
         ctx = null;
     }
 
