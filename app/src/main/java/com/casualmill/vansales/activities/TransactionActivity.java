@@ -165,6 +165,7 @@ public class TransactionActivity extends AppCompatActivity {
             currentInvoice = ((Invoice) getIntent().getSerializableExtra(InvoiceFragment.InvoiceExtraKey));
             LoadInvoice(currentInvoice);
             SetUiMode(UIMode.READ);
+            b.setTitle(currentInvoice.invoice_no);
         } else
             SetUiMode(UIMode.EDIT);
     }
@@ -207,6 +208,7 @@ public class TransactionActivity extends AppCompatActivity {
                     });
                 } catch (InterruptedException e) {
                     e.printStackTrace();
+                    LoadingActivity.DecrementLoading();
                 }
             }
         }).start();

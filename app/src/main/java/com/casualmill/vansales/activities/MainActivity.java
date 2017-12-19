@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        EventBus.getDefault().register(this);
         LoadUI();
     }
 
@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         AppDatabase.destroyAppDatabase();
+        EventBus.getDefault().unregister(this);
     }
 
     protected void LoadUI() {
@@ -151,18 +152,6 @@ public class MainActivity extends AppCompatActivity {
             if (loadingCount == 0)
                 LoadingActivity.Stop(this);
         }
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        EventBus.getDefault().register(this);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        EventBus.getDefault().unregister(this);
     }
 }
 
